@@ -25,7 +25,15 @@ namespace render {
         continue;
       }
 
-      if (key == "image_width:") {
+      if (key == "aspect_ratio:") {
+        int w{}, h{};
+        if (!(iss >> w >> h)) {
+          std::cerr << "Error: Invalid value for key: [aspect_ratio:]\n";
+          std::cerr << "Line: \"" << line << "\"\n";
+          continue;
+        }
+        cfg.aspect_ratio = {w, h};
+      } else if (key == "image_width:") {
         iss >> cfg.image_width;
       } else if (key == "gamma:") {
         iss >> cfg.gamma;

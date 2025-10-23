@@ -1,9 +1,11 @@
 #pragma once
 #include <string>
+#include <utility>
 
 namespace render {
 
   struct Config {
+    std::pair<int, int> aspect_ratio{16, 9};
     int image_width{1'920};
     float gamma{2.2F};
     int samples_per_pixel{20};

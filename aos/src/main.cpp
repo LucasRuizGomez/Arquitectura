@@ -1,3 +1,4 @@
+#include "config.hpp"
 #include "vector.hpp"
 #include <iostream>
 #include <print>
@@ -19,6 +20,13 @@ int main(int argc, char * argv[]) {
     std::cout << "Config: " << config_file << '\n';
     std::cout << "Scene: " << scene_file << '\n';
     std::cout << "Output: " << output_file << '\n';
+
+    render::Config const cfg = render::read_config(config_file);
+
+    std::cout << "Image width: " << cfg.image_width << '\n';
+    std::cout << "Gamma: " << cfg.gamma << '\n';
+    std::cout << "Field of view: " << cfg.field_of_view << '\n';
+    std::cout << "Camera position: " << cfg.camera_position << '\n';
 
     return 0;
   } catch (std::exception const & e) {
