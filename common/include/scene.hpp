@@ -33,6 +33,7 @@ namespace render {
   };
 
   // === Función de lectura ===
+  // ¡Asegúrate de que esta línea es una DECLARACIÓN (termina en ';')!
   Scene read_scene(std::string const & filename);
 
 }  // namespace render
