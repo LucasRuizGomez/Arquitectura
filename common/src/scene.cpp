@@ -1,4 +1,4 @@
-#include "scene.hpp"
+#include "../include/scene.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -112,6 +112,7 @@ namespace render {
           std::cerr << "Line: \"" << line << "\"\n";
           continue;
         }
+
         if (c.r <= 0) {
           std::cerr << "Error: Invalid cylinder radius\n";
           std::cerr << "Line: \"" << line << "\"\n";

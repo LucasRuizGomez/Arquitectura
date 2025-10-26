@@ -22,6 +22,7 @@ namespace render {
   struct Cylinder {
     float cx{}, cy{}, cz{}, r{};
     float ax{}, ay{}, az{};
+
     std::string material;
   };
 

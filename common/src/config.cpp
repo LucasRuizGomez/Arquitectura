@@ -1,4 +1,4 @@
-#include "config.hpp"
+#include "../include/config.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -15,7 +15,7 @@ namespace render {
 
     std::string line;
     while (std::getline(file, line)) {
-      if (line.empty() || line.starts_with('#')) {  // Ignorar comentarios
+      if (line.empty() or line.starts_with('#')) {  // Ignorar comentarios
         continue;
       }
 
