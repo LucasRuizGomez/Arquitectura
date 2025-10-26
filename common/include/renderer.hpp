@@ -64,7 +64,7 @@ namespace render {
       float inv_gamma;
       int max_depth;
       RNG material_rng;  // <-- ¡Añadido!
-      // RNG ray_rng;    // <-- (Para futura optimización de antialiasing)
+      RNG ray_rng;       // Optimizacion de Antialiasing para eliminar ruido en la imagen
     };
 
     // --- NUEVOS HELPERS DE FÍSICA (PDF Sec 3.5.2 y 3.5.3) ---
@@ -218,25 +218,59 @@ namespace render {
       .bg_light     = parse_vector_from_string(cfg.background_light_color),
       .inv_gamma    = 1.0F / cfg.gamma,  // Usamos el gamma del config
       .max_depth    = cfg.max_depth,
-      .material_rng = RNG(cfg.material_rng_seed)  // ¡Inicializa el RNG!
+      .material_rng = RNG(cfg.material_rng_seed),  // ¡Inicializa el RNG!
+      .ray_rng      = RNG(cfg.ray_rng_seed)        // Inicializamos ray_rng
     };
 
-    // Bucle de Renderizado
+    // Bucle de Renderizado Actualizado
+
     for (int y = 0; y < height; ++y) {
-      if (y % (height / 20) == 0 || y == height - 1) {
+      if (y % (height / 20) == 0 or y == height - 1) {
         std::print(std::cerr, "\rScanlines remaining: {:<4}", height - 1 - y);
       }
 
       for (int x = 0; x < width; ++x) {
-        float u = static_cast<float>(x) / static_cast<float>(width - 1);
-        float v = static_cast<float>(height - 1 - y) / static_cast<float>(height - 1);
+        // Acumula el color para este píxel
+        vector accumulated_color(0, 0, 0);
 
-        Ray r = camera.get_ray(u, v);
-        // ¡Llamada a la nueva función recursiva!
-        vector pixel_color = ray_color(r, scene, ctx, ctx.max_depth);
-        write_color(image, x, y, pixel_color, ctx.inv_gamma);
+        // Bucle para Antialiasing (Multisampling)
+        for (int s = 0; s < cfg.samples_per_pixel; ++s) {
+          // Coordenadas UV con offset aleatorio
+          float u =
+              (static_cast<float>(x) + ctx.ray_rng.random_float()) / static_cast<float>(width - 1);
+          float v = (static_cast<float>(height - 1 - y) + ctx.ray_rng.random_float()) /
+                    static_cast<float>(height - 1);
+
+          // Obtiene el rayo y calcula su color
+          Ray r = camera.get_ray(u, v);
+          accumulated_color += ray_color(r, scene, ctx, cfg.max_depth);
+        }
+
+        // Promedia el color acumulado
+        auto final_color = accumulated_color / static_cast<float>(cfg.samples_per_pixel);
+
+        // Escribe el color final en la imagen
+        write_color(image, x, y, final_color, ctx.inv_gamma);
       }
     }
+
+    /*     for (int y = 0; y < height; ++y) {
+          if (y % (height / 20) == 0 || y == height - 1) {
+            std::print(std::cerr, "\rScanlines remaining: {:<4}", height - 1 - y);
+          }
+
+          for (int x = 0; x < width; ++x) {
+            float u = static_cast<float>(x) / static_cast<float>(width - 1);
+            float v = static_cast<float>(height - 1 - y) / static_cast<float>(height - 1);
+
+            Ray r = camera.get_ray(u, v);
+            // ¡Llamada a la nueva función recursiva!
+            vector pixel_color = ray_color(r, scene, ctx, ctx.max_depth);
+            write_color(image, x, y, pixel_color, ctx.inv_gamma);
+          }
+        }
+     */
+
     std::println(std::cerr, "\nRender complete.");
   }
 
