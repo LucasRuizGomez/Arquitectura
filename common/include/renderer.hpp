@@ -64,7 +64,9 @@ namespace render {
     // --- CLASE DE CÁMARA ---
     class Camera {
       // ... (Tu clase Camera. Sin cambios) ...
+
     public:
+      // VENTANA DE PROYECCION
       Camera(vector lookfrom, vector lookat, vector vup, float vfov, float aspect_ratio) {
         auto const theta           = vfov * (std::numbers::pi_v<float> / 180.0F);
         auto const h               = std::tan(theta / 2.0F);

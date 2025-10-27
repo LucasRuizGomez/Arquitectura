@@ -49,21 +49,21 @@ namespace render {
         try {
           if (m.type == "matte") {
             // Espera 3 floats
-            float r, g, b;
+            float r, g, b;  // Tres Valores --> REFLECTANCIA DEL MATERIAL
             if (!(iss >> r >> g >> b)) {
               throw std::runtime_error("expected 3 params (R G B)");
             }
             m.params = {r, g, b};
           } else if (m.type == "metal") {
             // Espera 4 floats
-            float r, g, b, roughness;
+            float r, g, b, roughness;  // Cuatro Valores --> REFLECTACINCIA MATERIAL + DIFUSION
             if (!(iss >> r >> g >> b >> roughness)) {
               throw std::runtime_error("expected 4 params (R G B Roughness)");
             }
             m.params = {r, g, b, roughness};
           } else if (m.type == "refractive") {
             // Espera 1 float
-            float ior;
+            float ior;  // INDICE DE REFRACCION
             if (!(iss >> ior)) {
               throw std::runtime_error("expected 1 param (IndexOfRefraction)");
             }
