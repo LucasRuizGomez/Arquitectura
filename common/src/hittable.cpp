@@ -112,7 +112,22 @@ namespace render {
       rec.point  = Q;
 
       // 4. Calcula la normal (simplificado)
-      rec.normal        = (Q - C - hit_height * axis).normalized();
+      rec.normal = (Q - C - hit_height * axis).normalized();
+
+      //
+      //
+      //
+      //
+      // Invertimos la normal en caso especifico
+      //
+
+      if (dot(r.direction(), rec.normal) > 0.F) {
+        // Si el producto punto es positivo, la normal está apuntando
+        // en la misma dirección que el rayo, lo cual está MAL.
+        rec.normal = -rec.normal;
+      }
+
+      //
       rec.material_name = c.material;
       closest_hit       = rec;
     };
@@ -141,9 +156,22 @@ namespace render {
       if ((Q - cap_center).length_squared() <= radius_sq) {
         min_lambda = lambda;
         HitRecord rec;
-        rec.lambda        = lambda;
-        rec.point         = Q;
-        rec.normal        = normal;
+        rec.lambda = lambda;
+        rec.point  = Q;
+
+        //
+        //
+        //
+        rec.normal = normal;
+
+        // SOLUCION PROBLEMA TAPAS OSCURAS
+        //
+        //
+        if (dot(r.direction(), rec.normal) > 0.F) {
+          rec.normal = -rec.normal;
+        }
+        //
+        //
         rec.material_name = c.material;
         closest_hit       = rec;
       }

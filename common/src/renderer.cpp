@@ -134,9 +134,9 @@ namespace render {
               (reflected + roughness * ctx.material_rng.random_in_unit_sphere()).normalized();
           Ray bounced_ray(hit->point, bounce_direction);
 
-          if (dot(bounced_ray.direction(), hit->normal) <= 0.F) {
+          /* if (dot(bounced_ray.direction(), hit->normal) <= 0.F) {
             return {0.F, 0.F, 0.F};
-          }
+          } */
           return albedo * ray_color(bounced_ray, scene, ctx, depth - 1);
         }
 
@@ -162,7 +162,6 @@ namespace render {
               direction);  // (normal * ... ) lo he añadido para ver si arregla refractive
           return albedo * ray_color(bounced_ray, scene, ctx, depth - 1);
         }
-
       } catch (std::out_of_range const &) {
         std::cerr << "Error: Material no encontrado: " << hit->material_name << '\n';
       }
@@ -172,8 +171,11 @@ namespace render {
     // --- Background Color ---
     float m = (r.direction().y() + 1.0F) * 0.5F;
     // Use the inverted mix to match s4.ppm (light top)
-    return (1.0F - m) * ctx.bg_dark +
-           m * ctx.bg_light;  // NO SE TIO ESTO CREO Q ESTA BIEN ASI PERO SINO VOLVER A INVERTIR
+
+    return (1.0F - m) * ctx.bg_light + m * ctx.bg_dark;
+
+    /* return (1.0F - m) * ctx.bg_dark +
+           m * ctx.bg_light;  // NO SE TIO ESTO CREO Q ESTA BIEN ASI PERO SINO VOLVER A INVERTIR */
   }
 
 }  // namespace render
