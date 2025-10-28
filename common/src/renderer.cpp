@@ -96,8 +96,8 @@ namespace render {
     return {m_camera_origin, (pixel_center - m_camera_origin).normalized()};
   }
 
-  // PROFUNDIDAD <= 0, NO HAY CONTRIBUCION AL COLOR
   vector ray_color(Ray const & r, render::Scene const & scene, RenderContext & ctx, int depth) {
+    // PROFUNDIDAD <= 0, NO HAY CONTRIBUCION AL COLOR
     if (depth <= 0) {
       return {0.F, 0.F, 0.F};
     }
@@ -131,7 +131,7 @@ namespace render {
           float roughness  = mat.params[3];
           vector reflected = reflect(r.direction(), hit->normal);
           vector bounce_direction =
-              (reflected + roughness * ctx.material_rng.random_in_unit_sphere()).normalized();
+              (reflected + roughness * ctx.material_rng.random_in_unit_sphere());
           Ray bounced_ray(hit->point, bounce_direction);
 
           /* if (dot(bounced_ray.direction(), hit->normal) <= 0.F) {
@@ -170,7 +170,6 @@ namespace render {
 
     // --- Background Color ---
     float m = (r.direction().y() + 1.0F) * 0.5F;
-    // Use the inverted mix to match s4.ppm (light top)
 
     return (1.0F - m) * ctx.bg_light + m * ctx.bg_dark;
 

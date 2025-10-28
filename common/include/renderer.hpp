@@ -79,9 +79,9 @@ namespace render {
     auto const b = std::clamp(color.z(), 0.0F, 1.0F);
 
     // ESCALADO DE RANGO [0, 255]
-    auto const r_byte = static_cast<uint8_t>(r * 255.999F);
-    auto const g_byte = static_cast<uint8_t>(g * 255.999F);
-    auto const b_byte = static_cast<uint8_t>(b * 255.999F);
+    auto const r_byte = static_cast<uint8_t>(r * 255.0F);
+    auto const g_byte = static_cast<uint8_t>(g * 255.0F);
+    auto const b_byte = static_cast<uint8_t>(b * 255.0F);
     image.set_pixel(x, y, r_byte, g_byte, b_byte);
   }
 
