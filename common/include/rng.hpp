@@ -9,14 +9,14 @@ namespace render {
   class RNG {
   public:
     // Se inicializa con la semilla del config.txt
-    RNG(int seed) : gen(static_cast<unsigned int>(seed)) { }
+    RNG(uint64_t seed) : gen(seed) { }
 
     // Devuelve un float aleatorio en [0, 1)
     float random_float() { return dist(gen); }
 
     // Devuelve un vector aleatorio en [0, 1)
     render::vector random_vector() {
-      return render::vector(random_float(), random_float(), random_float());
+      return {random_float(), random_float(), random_float()};  // He cambiado esto por si no va
     }
 
     // Devuelve un vector aleatorio dentro de una esfera unitaria
@@ -33,12 +33,12 @@ namespace render {
         }
 
         // Devolvemos el vector normalizado
-        return p.normalized();
+        return p;  // MATERIAL MATE --> ANTES ERA return p.normalized();
       }
     }
 
   private:
-    std::mt19937 gen;  // Generador Mersenne Twister
+    std::mt19937_64 gen;  // Generador Mersenne Twister
     std::uniform_real_distribution<float> dist{0.0F, 1.0F};
   };
 

@@ -6,6 +6,7 @@ target_sources(common
         src/config.cpp
         src/scene.cpp
         src/hittable.cpp
+        src/renderer.cpp
 )
 
 target_include_directories(common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
