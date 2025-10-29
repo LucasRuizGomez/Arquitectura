@@ -1,5 +1,3 @@
-include(cmake/TestUtils.cmake)
-
 set(COMMON_SRC_FILES 
   "${CMAKE_SOURCE_DIR}/common/src/vector.cpp"
   "${CMAKE_SOURCE_DIR}/common/src/config.cpp"  
