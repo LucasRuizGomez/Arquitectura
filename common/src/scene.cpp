@@ -36,7 +36,7 @@ namespace render {
     while (std::getline(file, line)) {
       ++line_number;
 
-      if (line.empty() || line.starts_with('#')) {  // Ignorar comentarios
+      if (line.empty() || (!line.empty() && line[0] == '#')) {  // Ignorar comentarios
         continue;
       }
 
@@ -62,7 +62,7 @@ namespace render {
             " material parameters\nLine: \"" + line + "\"");
         }
         // M: "Material repetido"
-        if (scene.materials.contains(name)) {
+        if (scene.materials.find(name) != scene.materials.end()) {
           throw std::runtime_error(
             "Error: Material with name [\"" + name + "\"] already exists\nLine: \"" + line + "\"");
         }
@@ -154,11 +154,11 @@ namespace render {
         if (s.r <= 0.0F) {
           throw std::runtime_error("Error: Invalid sphere parameters\nLine: \"" + line + "\"");
         }
-        if (!scene.materials.contains(s.material)) {
+        if (scene.materials.find(s.material) == scene.materials.end()) {
           throw std::runtime_error("Error: Material not found: [\"" + s.material + "\"]\nLine: \"" + line + "\"");
         }
 
-        // Datos extra
+        // Datos extr
         std::istringstream iss_copy(line);
         { std::string tmp; iss_copy >> tmp; } // key
         float cx, cy, cz, r;
@@ -188,7 +188,7 @@ namespace render {
         if (c.r <= 0.0F) {
           throw std::runtime_error("Error: Invalid cylinder parameters\nLine: \"" + line + "\"");
         }
-        if (!scene.materials.contains(c.material)) {
+        if (scene.materials.find(c.material) == scene.materials.end()) {
                     throw std::runtime_error("Error: Material not found: [\"" + c.material + "\"]\nLine: \"" + line + "\"");
         }
         // Datos extra
