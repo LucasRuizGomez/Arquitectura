@@ -1,12 +1,19 @@
-
-
+include(cmake/TestUtils.cmake)
 
 set(COMMON_SRC_FILES 
   "${CMAKE_SOURCE_DIR}/common/src/vector.cpp"
+  "${CMAKE_SOURCE_DIR}/common/src/config.cpp"  
+  "${CMAKE_SOURCE_DIR}/common/src/hittable.cpp"  
+  "${CMAKE_SOURCE_DIR}/common/src/renderer.cpp"  
+  "${CMAKE_SOURCE_DIR}/common/src/scene.cpp"
 )
 
 set(CURRENT_DIR_SRC_FILES 
   "${CMAKE_CURRENT_SOURCE_DIR}/test_vector.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/test_config.cpp" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/test_hittable.cpp"  
+  "${CMAKE_CURRENT_SOURCE_DIR}/test_renderer.cpp"  
+  "${CMAKE_CURRENT_SOURCE_DIR}/test_scene.cpp"
 )
 
 add_unit_test_target(
