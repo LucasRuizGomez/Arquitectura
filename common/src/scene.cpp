@@ -9,7 +9,7 @@ namespace render {
 
     // ---------- M: Helpers mínimos para formar mensajes de "Extra:" ----------
     // No cambian la lógica; solo ayudan a construir el texto de error requerido por el enunciado.
-    static inline std::string collect_extra(std::istringstream & iss) {
+    inline std::string collect_extra(std::istringstream & iss) {
       // Captura el siguiente token y lo que quede (si hay) como "Extra: ..."
       std::string extra;
       if (iss >> extra) {
@@ -60,25 +60,25 @@ namespace render {
           // M: "Información insuficiente" para material → mensaje exacto requerido
           // (Invalid <tipo> material parameters) + línea
           std::ostringstream oss;
-          oss << "Error: Invalid " +
-                     std::string(key == "matte:"   ? "matte"
-                                 : key == "metal:" ? "metal"
-                                                   : "refractive") +
-                     " material parameters\nLine: \"" +
-                     line +
-                     "\""
-              << key;
+          std::string type;
+          // M: sustituido ternario anidado por if/else para mejor legibilidad y evitar warning
+          if (key == "matte:") {
+            type = "matte";
+          } else if (key == "metal:") {
+            type = "metal";
+          } else {
+            type = "refractive";
+          }
+
+          oss << "Error: Invalid " << type << " material parameters\nLine: \"" << line << "\"";
+          throw std::runtime_error(oss.str());
+
           throw std::runtime_error(oss.str());
         }
         // M: "Material repetido"
         if (scene.materials.find(name) != scene.materials.end()) {
           std::ostringstream oss;
-          oss << "Error: Material with name [\"" +
-                     name +
-                     "\"] already exists\nLine: \"" +
-                     line +
-                     "\""
-              << key;
+          oss << "Error: Material repetido" << key;
           throw std::runtime_error(oss.str());
         }
 
@@ -107,14 +107,11 @@ namespace render {
           }  // ya controlado
           std::string extra = collect_extra(iss_copy);
           if (!extra.empty()) {
-            throw std::runtime_error(
-                "Error: Extra data after configuration value for key: [matte:]\n"
-                "Extra: \"" +
-                extra +
-                "\"\n"
-                "Line: \"" +
-                line +
-                "\"");
+            std::ostringstream oss;  // M: usado para evitar concatenaciones temporales
+            oss << "Error: Extra data after configuration value for key: [metal:]\n"
+                << "Extra: \"" << extra << "\"\n"
+                << "Line: \"" << line << "\"";
+            throw std::runtime_error(oss.str());
           }
 
           m.params = {r, g, b};
@@ -138,14 +135,11 @@ namespace render {
           }
           std::string extra = collect_extra(iss_copy);
           if (!extra.empty()) {
-            throw std::runtime_error(
-                "Error: Extra data after configuration value for key: [metal:]\n"
-                "Extra: \"" +
-                extra +
-                "\"\n"
-                "Line: \"" +
-                line +
-                "\"");
+            std::ostringstream oss;
+            oss << "Error: Extra data after configuration value for key: [sphere:]\n"
+                << "Extra: \"" << extra << "\"\n"
+                << "Line: \"" << line << "\"";
+            throw std::runtime_error(oss.str());
           }
 
           m.params = {r, g, b, roughness};
@@ -170,14 +164,11 @@ namespace render {
           }
           std::string extra = collect_extra(iss_copy);
           if (!extra.empty()) {
-            throw std::runtime_error(
-                "Error: Extra data after configuration value for key: [refractive:]\n"
-                "Extra: \"" +
-                extra +
-                "\"\n"
-                "Line: \"" +
-                line +
-                "\"");
+            std::ostringstream oss;
+            oss << "Error: Extra data after configuration value for key: [cylinder:]\n"
+                << "Extra: \"" << extra << "\"\n"
+                << "Line: \"" << line << "\"";
+            throw std::runtime_error(oss.str());
           }
           m.params = {ior};
         }
@@ -190,8 +181,7 @@ namespace render {
       //         ESFERAS
       // =========================
 
-      else if (key == "sphere:")
-      {
+      if (key == "sphere:") {
         Sphere s;
         if (!(iss >> s.cx >> s.cy >> s.cz >> s.r >> s.material)) {
           throw std::runtime_error("Error: Invalid sphere parameters\nLine: \"" + line + "\"");
@@ -216,14 +206,11 @@ namespace render {
         }
         std::string extra = collect_extra(iss_copy);
         if (!extra.empty()) {
-          throw std::runtime_error(
-              "Error: Extra data after configuration value for key: [sphere:]\n"
-              "Extra: \"" +
-              extra +
-              "\"\n"
-              "Line: \"" +
-              line +
-              "\"");
+          std::ostringstream oss;
+          oss << "Error: Extra data after configuration value for key: [refractive:]\n"
+              << "Extra: \"" << extra << "\"\n"
+              << "Line: \"" << line << "\"";
+          throw std::runtime_error(oss.str());
         }
 
         scene.spheres.push_back(s);
@@ -259,14 +246,11 @@ namespace render {
         }
         std::string extra = collect_extra(iss_copy);
         if (!extra.empty()) {
-          throw std::runtime_error(
-              "Error: Extra data after configuration value for key: [cylinder:]\n"
-              "Extra: \"" +
-              extra +
-              "\"\n"
-              "Line: \"" +
-              line +
-              "\"");
+          std::ostringstream oss;
+          oss << "Error: Extra data after configuration value for key: [cylinder:]\n"
+              << "Extra: \"" << extra << "\"\n"
+              << "Line: \"" << line << "\"";
+          throw std::runtime_error(oss.str());
         }
 
         scene.cylinders.push_back(c);
