@@ -1,15 +1,11 @@
 #include "../include/hittable.hpp"
 #include "../include/vector.hpp"
-#include <cmath>      // Para std::sqrtf, std::fabs
-#include <optional>   // <-- Add this line
-#include <stdexcept>  // M: añadido para lanzar errores graves
-#include <vector>
-using std::vector;               // Now you can just write 'vector'
-#include "../include/scene.hpp"  // M: añade esto para Sphere y Ray
-#include <cmath>                 // Para std::sqrtf, std::fabs
+#include <cmath>
 #include <optional>
-#include <stdexcept>  // M: para lanzar errores
+#include <stdexcept>
 #include <vector>
+using std::vector;
+#include "../include/scene.hpp"
 
 namespace render {
 
