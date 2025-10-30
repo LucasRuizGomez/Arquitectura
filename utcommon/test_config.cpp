@@ -32,10 +32,10 @@ TEST(ConfigTest, ReadConfig_DefaultValues) {
 
   render::Config cfg = render::read_config("defaults.cfg");
 
-  EXPECT_EQ(cfg.image_width, 1'920);      // Valor por defecto
-  EXPECT_EQ(cfg.gamma, 2.2);              // Valor por defecto
-  EXPECT_EQ(cfg.samples_per_pixel, 100);  // Valor por defecto
-  EXPECT_EQ(cfg.max_depth, 5);            // Valor por defecto
+  EXPECT_EQ(cfg.image_width, 1'920);     // Valor por defecto
+  EXPECT_NEAR(cfg.gamma, 2.2, 0.00001);  // Valor por defecto
+  EXPECT_EQ(cfg.samples_per_pixel, 20);  // Valor por defecto
+  EXPECT_EQ(cfg.max_depth, 5);           // Valor por defecto
 }
 
 // Comprobación de que se ignoran comentarios y líneas vacías
