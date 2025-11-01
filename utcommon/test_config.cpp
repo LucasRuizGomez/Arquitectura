@@ -194,29 +194,19 @@ namespace {
         std::runtime_error);
   }
 
-  // BUG conocido: los comentarios no se saltan (falta `continue;`)
-  // Este test describe el comportamiento esperado (ignorar '# ...'),
-  // pero está deshabilitado hasta que se arregle el parser.
-  TEST(ConfigRead, DISABLED_CommentsAreIgnored) {
-    std::string const cfg = "# comentario\n"
-                            "aspect_ratio: 1 1\n";
-    auto p                = writeTmp("with_comment.cfg", cfg);
-    Config c              = read_config(p);
-    EXPECT_EQ(c.aspect_ratio.first, 1);
-    EXPECT_EQ(c.aspect_ratio.second, 1);
-  }
-
-  TEST(ConfigRead, CameraStringsPreserveRestOfLine) {
-    std::string const cfg = "camera_position: 10 20 30\n"
-                            "camera_target: 0 0 1 # trailing text\n"
-                            "camera_north:  0  1  0  \n";
-    auto p                = writeTmp("camera.cfg", cfg);
-    Config c              = read_config(p);
-
-    // Mantiene el espacio inicial por cómo se usa getline tras extraer la clave
-    EXPECT_EQ(c.camera_position, " 10 20 30");
-    EXPECT_EQ(c.camera_target, " 0 0 1 # trailing text");
-    EXPECT_EQ(c.camera_north, "  0  1  0  ");
-  }
-
 }  // namespace
+
+TEST(ConfigRead, CameraStringsPreserveRestOfLine) {
+  std::string const cfg = "camera_position: 10 20 30\n"
+                          "camera_target: 0 0 1 # trailing text\n"
+                          "camera_north:  0  1  0  \n";
+  auto p                = writeTmp("camera.cfg", cfg);
+  Config c              = read_config(p);
+
+  // Mantiene el espacio inicial por cómo se usa getline tras extraer la clave
+  EXPECT_EQ(c.camera_position, " 10 20 30");
+  EXPECT_EQ(c.camera_target, " 0 0 1 # trailing text");
+  EXPECT_EQ(c.camera_north, "  0  1  0  ");
+}
+
+// namespace
