@@ -112,7 +112,7 @@ namespace render {
       rec.point  = Q;
 
       // 4. Calcula la normal (simplificado)
-      rec.normal = (Q - C - hit_height * axis).normalized();
+      rec.normal = (Q - C - hit_height * axis);
 
       //
       //
