@@ -60,6 +60,15 @@ namespace render {
       throw std::runtime_error("Error: Sphere normal computed as NaN");
     }
 
+    //
+    //
+    //
+    if (dot(r.direction(), rec.normal) > 0.F) {
+      rec.normal = -rec.normal;
+    }
+    //
+    //
+
     return rec;
   }
 
