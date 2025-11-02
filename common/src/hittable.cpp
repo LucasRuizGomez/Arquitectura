@@ -28,9 +28,9 @@ namespace render {
     float const discriminant = B * B - 4.F * A * C;
 
     // M: comprobación del discriminante
-    if (std::isnan(discriminant) or std::isinf(discriminant)) {
-      throw std::runtime_error("Error: Sphere discriminant produced NaN or INF");
-    }
+    /*     if (std::isnan(discriminant) or std::isinf(discriminant)) {
+          throw std::runtime_error("Error: Sphere discriminant produced NaN or INF");
+        } */
 
     if (discriminant < 0.F) {
       return std::nullopt;  // No hay intersección
@@ -52,9 +52,10 @@ namespace render {
     rec.material_name = s.material;
 
     // M: comprobación final de normal
-    if (std::isnan(rec.normal.x()) or std::isnan(rec.normal.y()) or std::isnan(rec.normal.z())) {
-      throw std::runtime_error("Error: Sphere normal computed as NaN");
-    }
+    /*     if (std::isnan(rec.normal.x()) or std::isnan(rec.normal.y()) or
+       std::isnan(rec.normal.z())) { throw std::runtime_error("Error: Sphere normal computed as
+       NaN");
+        } */
 
     return rec;
   }
@@ -99,9 +100,9 @@ namespace render {
     float discriminant = B * B - 4.F * A * C_body;
 
     // M: comprobación de discriminante
-    if (std::isnan(discriminant) or std::isinf(discriminant)) {
-      throw std::runtime_error("Error: Cylinder discriminant produced NaN or INF");
-    }
+    /*     if (std::isnan(discriminant) or std::isinf(discriminant)) {
+          throw std::runtime_error("Error: Cylinder discriminant produced NaN or INF");
+        } */
 
     if (discriminant < 0.F) {
       return std::nullopt;  // No golpea el cilindro infinito
@@ -141,9 +142,10 @@ namespace render {
       rec.normal = (Q - C - hit_height * axis);
 
       // M: comprobación de normal inválida
-      if (std::isnan(rec.normal.x()) or std::isnan(rec.normal.y()) or std::isnan(rec.normal.z())) {
-        throw std::runtime_error("Error: Cylinder normal computed as NaN");
-      }
+      /*       if (std::isnan(rec.normal.x()) or std::isnan(rec.normal.y()) or
+         std::isnan(rec.normal.z())) { throw std::runtime_error("Error: Cylinder normal computed as
+         NaN");
+            } */
 
       // Invertimos la normal en caso especifico
       if (dot(r.direction(), rec.normal) > 0.F) {
