@@ -1,12 +1,13 @@
 #include "../include/hittable.hpp"
 #include "../include/vector.hpp"
-#include <vector>
-using std::vector;
+// #include <vector>
+// using std::vector;
 #include "../include/scene.hpp"
 
 #include <cmath>
-#include <iomanip>
-#include <iostream>
+
+// #include <iomanip>
+// #include <iostream>
 
 namespace render {
 

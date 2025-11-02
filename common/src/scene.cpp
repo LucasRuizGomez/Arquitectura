@@ -34,6 +34,7 @@ namespace render {
     }
 
     std::string line;
+
     int line_number = 0;
 
     while (std::getline(file, line)) {

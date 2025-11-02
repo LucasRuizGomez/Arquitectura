@@ -10,9 +10,9 @@ namespace render {
 
   // Contiene la información de una intersección
   struct HitRecord {
-    float lambda{};   // Distancia 't' o 'λ' a lo largo del rayo
-    vector point{};   // <-- Ahora es un render::vector
-    vector normal{};  // <-- Ahora es un render::vector
+    float lambda{};  // Distancia 't' o 'λ' a lo largo del rayo
+    vector point;    // <-- Ahora es un render::vector
+    vector normal;   // <-- Ahora es un render::vector
     std::string material_name;
   };
 
