@@ -29,14 +29,12 @@ namespace render {
     Scene scene{};
     std::ifstream file(filename);
     if (!file.is_open()) {
-      // M: Lanzamos  excepción para terminar la ejecución
       throw std::runtime_error("Error: cannot open scene file: " + filename);
     }
 
     std::string line;
 
     int line_number = 0;
-
     while (std::getline(file, line)) {
       ++line_number;
 
@@ -50,10 +48,6 @@ namespace render {
         // Si no hay token útil (espacios sueltos), también lo ignoramos
         continue;
       }
-
-      // =========================
-      //       MATERIALES
-      // =========================
 
       if (key == "matte:" or key == "metal:" or key == "refractive:") {
         std::string name;
@@ -82,12 +76,9 @@ namespace render {
           oss << "Error: Material repetido" << key;
           throw std::runtime_error(oss.str());
         }
-
         Material m;
         m.name = name;
-        m.type = key.substr(0, key.size() - 1);  // elimina ':'
-
-        // --- LÓGICA CORREGIDA ---
+        m.type = key.substr(0, key.size() - 1);
 
         if (m.type == "matte") {
           // Espera 3 floats
@@ -178,10 +169,6 @@ namespace render {
         continue;
       }
 
-      // =========================
-      //         ESFERAS
-      // =========================
-
       if (key == "sphere:") {
         Sphere s;
         if (!(iss >> s.cx >> s.cy >> s.cz >> s.r >> s.material)) {
@@ -216,13 +203,7 @@ namespace render {
 
         scene.spheres.push_back(s);
 
-      }
-
-      // =========================
-      //        CILINDROS
-      // =========================
-      else if (key == "cylinder:")
-      {
+      } else if (key == "cylinder:") {
         Cylinder c;
         if (!(iss >> c.cx >> c.cy >> c.cz >> c.r >> c.ax >> c.ay >> c.az >> c.material)) {
           throw std::runtime_error("Error: Invalid cylinder parameters\nLine: \"" + line + "\"");
@@ -256,15 +237,7 @@ namespace render {
 
         scene.cylinders.push_back(c);
         continue;
-      }
-
-      // =========================
-      //   ETIQUETA DESCONOCIDA
-      // =========================
-      // Mensaje EXACTO del enunciado
-
-      else
-      {
+      } else {
         std::ostringstream oss;
         oss << "Error: Unknown scene entity: " << key;
         throw std::runtime_error(oss.str());
