@@ -8,7 +8,7 @@ namespace render {
     std::pair<int, int> aspect_ratio{16, 9};
     int image_width{1'920};
     float gamma{2.2F};
-    int samples_per_pixel{20};
+    int samples_paer_pixel{20};
     int max_depth{5};
 
     std::string camera_position{"0 0 -10"};
