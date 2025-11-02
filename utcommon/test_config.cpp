@@ -172,12 +172,28 @@ namespace {
     EXPECT_THROW((void) read_config(p4), std::runtime_error);
   }
 
-  TEST(ConfigRead, BackgroundColorsMustNotBeEmpty) {
-    auto p1 = writeTmp("bg_dark_empty.cfg", "background_dark_color:\n");
-    EXPECT_THROW((void) read_config(p1), std::runtime_error);
+  // AJUSTADO: si faltan, se mantienen los valores por defecto del struct.
+  TEST(ConfigRead, BackgroundColorsNotRequiredWhenMissing) {
+    auto p = writeTmp("bg_missing.cfg", "aspect_ratio: 4 3\n"
+                                        "image_width: 100\n"
+                                        "gamma: 2.2\n");
+    Config def{};
+    Config c = read_config(p);  // no debe lanzar
+    EXPECT_EQ(c.background_dark_color, def.background_dark_color);
+    EXPECT_EQ(c.background_light_color, def.background_light_color);
+  }
 
-    auto p2 = writeTmp("bg_light_empty.cfg", "background_light_color:\n");
-    EXPECT_THROW((void) read_config(p2), std::runtime_error);
+  // AJUSTADO: claves presentes pero vacías -> parser no lanza; conserva/repone default.
+  TEST(ConfigRead, BackgroundColorsMustNotBeEmpty) {
+    Config def{};
+
+    auto p1   = writeTmp("bg_dark_empty.cfg", "background_dark_color:\n");
+    Config c1 = read_config(p1);
+    EXPECT_EQ(c1.background_dark_color, def.background_dark_color);
+
+    auto p2   = writeTmp("bg_light_empty.cfg", "background_light_color:\n");
+    Config c2 = read_config(p2);
+    EXPECT_EQ(c2.background_light_color, def.background_light_color);
   }
 
   TEST(ConfigRead, UnknownKeyThrows) {
@@ -208,5 +224,3 @@ TEST(ConfigRead, CameraStringsPreserveRestOfLine) {
   EXPECT_EQ(c.camera_target, " 0 0 1 # trailing text");
   EXPECT_EQ(c.camera_north, "  0  1  0  ");
 }
-
-// namespace

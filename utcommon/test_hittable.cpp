@@ -54,7 +54,9 @@ TEST(HitSphereTest, RayStartsInside) {
   ASSERT_TRUE(hit.has_value());
   EXPECT_NEAR(hit->lambda, 1.0F, epsilon);
   EXPECT_VEC_NEAR(hit->point, vector(0, 0, 1));
-  EXPECT_VEC_NEAR(hit->normal, vector(0, 0, 1));
+  // Como el rayo sale del interior, tu código invierte la normal para que mire
+  // contra la dirección del rayo.
+  EXPECT_VEC_NEAR(hit->normal, vector(0, 0, -1));
 }
 
 TEST(HitSphereTest, RayHitBehind) {

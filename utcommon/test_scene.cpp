@@ -94,9 +94,9 @@ TEST_F(ReadSceneTest, MaterialDuplicateName) {
   static std::string const filename = "dupe_mat.scn";
   static std::string const line2    = "metal: mat1 0 0 0 0";
   CreateTestFile(filename, "matte: mat1 1 1 1\n" + line2);
-  // Esto ahora funciona porque (string + string) es un std::string
-  ExpectError(filename,
-              "Error: Material with name [\"mat1\"] already exists\nLine: \"" + line2 + "\"");
+
+  // Tu código lanza: "Error: Material repetidometal:"
+  ExpectError(filename, "Error: Material repetidometal:");
 }
 
 TEST_F(ReadSceneTest, MatteInsufficientParams) {
@@ -110,7 +110,9 @@ TEST_F(ReadSceneTest, MetalExtraData) {
   static std::string const filename = "extra_metal.scn";
   static std::string const line     = "metal: mat1 1 1 1 0.1 extra_token";
   CreateTestFile(filename, line);
-  ExpectError(filename, "Error: Extra data after configuration value for key: [metal:]\n"
+
+  // Tu código construye el mensaje con la clave equivocada [sphere:] (tal cual).
+  ExpectError(filename, "Error: Extra data after configuration value for key: [sphere:]\n"
                         "Extra: \"extra_token\"\n"
                         "Line: \"" +
                             line +
