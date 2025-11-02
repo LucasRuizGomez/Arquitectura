@@ -144,10 +144,6 @@ namespace render {
       // 4. Calcula la normal (simplificado)
       rec.normal = (Q - C - hit_height * axis);
 
-      // COMPROBADOR DE NORMAL
-      std::cerr << std::fixed << std::setprecision(10) << "DEBUG normal: (" << rec.normal.x()
-                << ", " << rec.normal.y() << ", " << rec.normal.z() << ")\n";
-
       // M: comprobación de normal inválida
       if (std::isnan(rec.normal.x()) or std::isnan(rec.normal.y()) or std::isnan(rec.normal.z())) {
         throw std::runtime_error("Error: Cylinder normal computed as NaN");
