@@ -134,9 +134,9 @@ namespace render {
               (reflected + roughness * ctx.material_rng.random_in_unit_sphere());
           Ray bounced_ray(hit->point, bounce_direction);
 
-          /* if (dot(bounced_ray.direction(), hit->normal) <= 0.F) {
-            return {0.F, 0.F, 0.F};
-          } */
+          /*           if (dot(bounced_ray.direction(), hit->normal) <= 0.F) {
+                      return {0.F, 0.F, 0.F};
+                    }  //////// ESTE IF ESTABA COMENTADO */
           return albedo * ray_color(bounced_ray, scene, ctx, depth - 1);
         }
 
