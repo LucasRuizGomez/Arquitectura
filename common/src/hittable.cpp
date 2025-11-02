@@ -4,6 +4,10 @@
 using std::vector;
 #include "../include/scene.hpp"
 
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+
 namespace render {
 
   // Constante de precisión para evitar problemas con floats
@@ -28,9 +32,9 @@ namespace render {
     float const discriminant = B * B - 4.F * A * C;
 
     // M: comprobación del discriminante
-    /*     if (std::isnan(discriminant) or std::isinf(discriminant)) {
-          throw std::runtime_error("Error: Sphere discriminant produced NaN or INF");
-        } */
+    if (std::isnan(discriminant) or std::isinf(discriminant)) {
+      throw std::runtime_error("Error: Sphere discriminant produced NaN or INF");
+    }
 
     if (discriminant < 0.F) {
       return std::nullopt;  // No hay intersección
@@ -52,10 +56,9 @@ namespace render {
     rec.material_name = s.material;
 
     // M: comprobación final de normal
-    /*     if (std::isnan(rec.normal.x()) or std::isnan(rec.normal.y()) or
-       std::isnan(rec.normal.z())) { throw std::runtime_error("Error: Sphere normal computed as
-       NaN");
-        } */
+    if (std::isnan(rec.normal.x()) or std::isnan(rec.normal.y()) or std::isnan(rec.normal.z())) {
+      throw std::runtime_error("Error: Sphere normal computed as NaN");
+    }
 
     return rec;
   }
@@ -100,9 +103,9 @@ namespace render {
     float discriminant = B * B - 4.F * A * C_body;
 
     // M: comprobación de discriminante
-    /*     if (std::isnan(discriminant) or std::isinf(discriminant)) {
-          throw std::runtime_error("Error: Cylinder discriminant produced NaN or INF");
-        } */
+    if (std::isnan(discriminant) or std::isinf(discriminant)) {
+      throw std::runtime_error("Error: Cylinder discriminant produced NaN or INF");
+    }
 
     if (discriminant < 0.F) {
       return std::nullopt;  // No golpea el cilindro infinito
@@ -141,11 +144,14 @@ namespace render {
       // 4. Calcula la normal (simplificado)
       rec.normal = (Q - C - hit_height * axis);
 
+      // COMPROBADOR DE NORMAL
+      std::cerr << std::fixed << std::setprecision(10) << "DEBUG normal: (" << rec.normal.x()
+                << ", " << rec.normal.y() << ", " << rec.normal.z() << ")\n";
+
       // M: comprobación de normal inválida
-      /*       if (std::isnan(rec.normal.x()) or std::isnan(rec.normal.y()) or
-         std::isnan(rec.normal.z())) { throw std::runtime_error("Error: Cylinder normal computed as
-         NaN");
-            } */
+      if (std::isnan(rec.normal.x()) or std::isnan(rec.normal.y()) or std::isnan(rec.normal.z())) {
+        throw std::runtime_error("Error: Cylinder normal computed as NaN");
+      }
 
       // Invertimos la normal en caso especifico
       if (dot(r.direction(), rec.normal) > 0.F) {
@@ -159,8 +165,12 @@ namespace render {
     };
 
     // Comprobamos las dos soluciones de la cuadrática
-    check_body_hit((-B - sqrt_discriminant) / (2.0F * A));
-    check_body_hit((-B + sqrt_discriminant) / (2.0F * A));
+    if (std::fabs(A) > epsilon) {
+      // (Línea 148)
+      check_body_hit((-B - sqrt_discriminant) / (2.0F * A));
+      // (Línea 149)
+      check_body_hit((-B + sqrt_discriminant) / (2.0F * A));
+    }
 
     // --- 3. COMPROBACIÓN DE LAS TAPAS ---
     auto check_cap_hit = [&](vector const & cap_center, vector const & normal) {
