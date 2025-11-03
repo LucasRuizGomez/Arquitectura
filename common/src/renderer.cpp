@@ -1,6 +1,4 @@
-#include "../include/renderer.hpp"  // Include the header file
-
-// Add other necessary includes that were used by the function bodies
+#include "../include/renderer.hpp"
 #include "../include/config.hpp"
 #include "../include/hittable.hpp"
 #include "../include/ray.hpp"
@@ -14,12 +12,10 @@
 #include <numbers>
 #include <optional>
 #include <sstream>
-#include <stdexcept>  // For std::out_of_range
+#include <stdexcept>
 #include <string>
 
 namespace render {
-
-  // --- DEFINITIONS MOVED HERE ---
 
   vector parse_vector_from_string(std::string s) {
     std::istringstream iss(s);

@@ -2,13 +2,11 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <stdexcept>  // ← M: necesitamos lanzar std::runtime_error para terminar la ejecución
+#include <stdexcept>
 
 namespace render {
   namespace {
 
-    // ---------- M: Helpers mínimos para formar mensajes de "Extra:" ----------
-    // No cambian la lógica; solo ayudan a construir el texto de error requerido por el enunciado.
     inline std::string collect_extra(std::istringstream & iss) {
       // Captura el siguiente token y lo que quede (si hay) como "Extra: ..."
       std::string extra;
@@ -18,9 +16,9 @@ namespace render {
         if (!tail.empty() and tail.front() == ' ') {
           tail.erase(tail.begin());  // limpia el primer espacio de getline
         }
-        extra += tail;  // une token + resto
+        extra += tail;
       }
-      return extra;  // si no había nada, devuelve ""
+      return extra;
     }
 
   }  // namespace
@@ -52,11 +50,8 @@ namespace render {
       if (key == "matte:" or key == "metal:" or key == "refractive:") {
         std::string name;
         if (!(iss >> name)) {
-          // M: "Información insuficiente" para material → mensaje exacto requerido
-          // (Invalid <tipo> material parameters) + línea
           std::ostringstream oss;
           std::string type;
-          // M: sustituido ternario anidado por if/else para mejor legibilidad y evitar warning
           if (key == "matte:") {
             type = "matte";
           } else if (key == "metal:") {
@@ -70,7 +65,7 @@ namespace render {
 
           throw std::runtime_error(oss.str());
         }
-        // M: "Material repetido"
+        // "Material repetido"
         if (scene.materials.find(name) != scene.materials.end()) {
           std::ostringstream oss;
           oss << "Error: Material repetido" << key;
@@ -99,7 +94,7 @@ namespace render {
           }  // ya controlado
           std::string extra = collect_extra(iss_copy);
           if (!extra.empty()) {
-            std::ostringstream oss;  // M: usado para evitar concatenaciones temporales
+            std::ostringstream oss;  // usado para evitar concatenaciones temporales
             oss << "Error: Extra data after configuration value for key: [metal:]\n"
                 << "Extra: \"" << extra << "\"\n"
                 << "Line: \"" << line << "\"";

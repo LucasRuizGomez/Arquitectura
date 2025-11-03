@@ -12,9 +12,10 @@
 namespace render {
 
   // Constante de precisión para evitar problemas con floats
-  constexpr float epsilon = 0.00001F;  // Un poco más pequeño
+  constexpr float epsilon = 0.00001F;
 
   // INTERSECCIÓN CON ESFERA
+
   std::optional<HitRecord> hit_sphere(Sphere const & s, Ray const & r, float lambda_min,
                                       float lambda_max) {
     if (s.r <= 0.0F) {
@@ -25,7 +26,7 @@ namespace render {
     }
     vector const center(s.cx, s.cy, s.cz);
     vector const rc          = r.origin() - center;
-    float const A            = r.direction().length_squared();  // 1.0F
+    float const A            = r.direction().length_squared();
     float const B            = 2.0F * dot(rc, r.direction());
     float const C            = rc.length_squared() - s.r * s.r;
     float const discriminant = B * B - 4.F * A * C;
@@ -57,7 +58,7 @@ namespace render {
     return rec;
   }
 
-  namespace {  // Namespace anonimo
+  namespace {
 
     struct CylinderHitTest {
       Ray r;
