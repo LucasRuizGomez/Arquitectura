@@ -1,20 +1,36 @@
+/**
+ * @file hittable.cpp
+ * @brief Implementa las funciones de intersección entre rayos y objetos geométricos (esferas y
+ * cilindros).
+ *
+ * Este módulo contiene la lógica necesaria para calcular los puntos de colisión entre rayos
+ * y primitivas de la escena, así como las comprobaciones de errores numéricos y de materiales.
+ */
 #include "../include/hittable.hpp"
-#include "../include/vector.hpp"
-// #include <vector>
-// using std::vector;
 #include "../include/scene.hpp"
-
+#include "../include/vector.hpp"
 #include <cmath>
-
-// #include <iomanip>
-// #include <iostream>
 
 namespace render {
 
-  // Constante de precisión para evitar problemas con floats
-  constexpr float epsilon = 0.00001F;  // Un poco más pequeño
+  /// @brief Tolerancia numérica mínima para evitar errores de precisión en comparaciones de floats.
+  constexpr float epsilon = 0.00001F;
 
-  // INTERSECCIÓN CON ESFERA
+  /**
+   * @brief Calcula la intersección entre un rayo y una esfera.
+   *
+   * Si el rayo impacta la superficie de la esfera dentro del rango [lambda_min, lambda_max],
+   * devuelve un registro de colisión con los datos del punto y la normal. Si no hay colisión,
+   * devuelve std::nullopt.
+   *
+   * @param s Esfera a comprobar.
+   * @param r Rayo incidente.
+   * @param lambda_min Límite inferior del rango de intersección válido.
+   * @param lambda_max Límite superior del rango de intersección válido.
+   * @return std::optional<HitRecord> con los datos de impacto o nullopt si no hay colisión.
+   * @throws std::runtime_error si se detectan valores numéricos inválidos (NaN o INF).
+   */
+
   std::optional<HitRecord> hit_sphere(Sphere const & s, Ray const & r, float lambda_min,
                                       float lambda_max) {
     if (s.r <= 0.0F) {
@@ -25,7 +41,7 @@ namespace render {
     }
     vector const center(s.cx, s.cy, s.cz);
     vector const rc          = r.origin() - center;
-    float const A            = r.direction().length_squared();  // 1.0F
+    float const A            = r.direction().length_squared();
     float const B            = 2.0F * dot(rc, r.direction());
     float const C            = rc.length_squared() - s.r * s.r;
     float const discriminant = B * B - 4.F * A * C;
@@ -59,6 +75,13 @@ namespace render {
 
   namespace {  // Namespace anonimo
 
+    /**
+     * @brief Estructura auxiliar para realizar comprobaciones de impacto con cilindros.
+     *
+     * Encapsula los cálculos intermedios y la lógica de validación de cuerpo y tapas
+     * para simplificar la función principal hit_cylinder().
+     */
+
     struct CylinderHitTest {
       Ray r;
       vector C;
@@ -79,12 +102,13 @@ namespace render {
             radius_sq(c.r * c.r), lambda_min(l_min), material_name(c.material), min_lambda(l_max),
             closest_hit(std::nullopt)  // <-- Inicializa el 'optional'
       {
-        // El cuerpo del constructor SOLO valida
+        // Valida que los parámetros geométricos del cilindro sean válidos antes de continuar.
         if (std::isnan(height) or height <= 0.0F) {
           throw std::runtime_error("Error: Cylinder height is invalid or zero");
         }
       }
 
+      /// @brief Comprueba intersección con la superficie lateral del cilindro.
       void check_body_hit(float lambda) {
         if (lambda < lambda_min or lambda > min_lambda) {
           return;
@@ -113,6 +137,7 @@ namespace render {
         closest_hit       = rec;
       }
 
+      /// @brief Comprueba intersección con las tapas superior e inferior del cilindro.
       void check_cap_hit(vector const & cap_center, vector const & normal) {
         float dr_dot_normal = dot(r.direction(), normal);
 
@@ -148,7 +173,20 @@ namespace render {
 
   }  // namespace
 
-  //  FUNCIÓN hit_cylinder
+  /**
+   * @brief Calcula la intersección entre un rayo y un cilindro finito.
+   *
+   * Determina si el rayo intersecta con el cuerpo o las tapas del cilindro dentro del
+   * rango especificado. Si hay impacto, devuelve el registro correspondiente.
+   *
+   * @param c Cilindro de la escena.
+   * @param r Rayo incidente.
+   * @param lambda_min Límite inferior del rango de detección.
+   * @param lambda_max Límite superior del rango de detección.
+   * @return std::optional<HitRecord> con el resultado del impacto o nullopt.
+   * @throws std::runtime_error si se detectan valores no válidos (NaN, radio ≤ 0, etc.).
+   */
+
   std::optional<HitRecord> hit_cylinder(Cylinder const & c, Ray const & r, float lambda_min,
                                         float lambda_max) {
     // Validaciones de entrada
@@ -188,6 +226,18 @@ namespace render {
     test_ctx.check_cap_hit(cap_bottom_center, -test_ctx.axis);
     return test_ctx.closest_hit;
   }
+
+  /**
+   * @brief Calcula el primer objeto de la escena intersectado por un rayo.
+   *
+   * Itera sobre todas las esferas y cilindros de la escena, devolviendo el impacto más cercano.
+   *
+   * @param scene Escena que contiene los objetos a comprobar.
+   * @param r Rayo lanzado.
+   * @param lambda_min Límite inferior del rango válido.
+   * @param lambda_max Límite superior del rango válido.
+   * @return std::optional<HitRecord> con el impacto más cercano o nullopt si no hay colisión.
+   */
 
   std::optional<HitRecord> hit_scene(Scene const & scene, Ray const & r, float lambda_min,
                                      float lambda_max) {

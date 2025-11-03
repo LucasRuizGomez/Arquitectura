@@ -1,15 +1,17 @@
 #include "../include/vector.hpp"
 
-// La mayoría de las implementaciones se han movido a 'vector.hpp'
-// como 'inline' para un mejor rendimiento.
-// Dejamos este archivo .cpp para que el enlazador
-// y CMake estén contentos.
+/**
+ * @file vector.cpp
+ * @brief Archivo de compatibilidad para el módulo de vectores 3D.
+ *
+ * Las funciones de la clase `vector` están implementadas como `inline` en
+ * `vector.hpp` para mejorar el rendimiento. Este archivo se mantiene únicamente
+ * por compatibilidad con el sistema de compilación (CMake y el enlazador).
+ */
 
 namespace render {
 
-  // Ya no usamos 'magnitude()', usamos 'length()',
-  // pero podemos dejar esto aquí.
-  // Opcionalmente, puedes borrar este archivo
-  // y quitarlo de 'common/CMakeLists.txt'.
+  // Este archivo no contiene implementación adicional.
+  // Todas las funciones se definen en el encabezado vector.hpp.
 
 }  // namespace render

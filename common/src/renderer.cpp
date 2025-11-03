@@ -1,4 +1,12 @@
-#include "../include/renderer.hpp"  // Include the header file
+/**
+ * @file renderer.cpp
+ * @brief Implementa las funciones principales del motor de renderizado.
+ *
+ * Contiene las rutinas de cálculo de rayos, reflexión, refracción y color,
+ * así como la configuración de la cámara y su proyección sobre el plano de imagen.
+ */
+
+#include "../include/renderer.hpp"
 
 // Add other necessary includes that were used by the function bodies
 #include "../include/config.hpp"
@@ -19,7 +27,16 @@
 
 namespace render {
 
-  // --- DEFINITIONS MOVED HERE ---
+  /**
+   * @brief Convierte una cadena con tres componentes numéricas en un vector 3D.
+   *
+   * Ejemplo de formato válido: `"1.0 0.5 -2.3"`.
+   * Si el formato es incorrecto, se devuelve un vector magenta por defecto (1, 0, 1)
+   * y se informa por consola estándar.
+   *
+   * @param s Cadena con los valores del vector separados por espacios.
+   * @return Vector con las componentes x, y, z extraídas.
+   */
 
   vector parse_vector_from_string(std::string s) {
     std::istringstream iss(s);
@@ -31,9 +48,28 @@ namespace render {
     return {x, y, z};
   }
 
+  /**
+   * @brief Calcula el vector reflejado de una dirección incidente respecto a una normal.
+   * @param v_in Vector incidente.
+   * @param normal Normal de la superficie.
+   * @return Vector reflejado.
+   */
+
   vector reflect(vector const & v_in, vector const & normal) {
     return v_in - 2.F * dot(v_in, normal) * normal;
   }
+
+  /**
+   * @brief Calcula la refracción de un rayo en la frontera entre dos medios.
+   *
+   * Usa la ley de Snell para determinar el nuevo vector de dirección. Si no hay
+   * refracción posible (reflexión total interna), devuelve std::nullopt.
+   *
+   * @param v_in_unit Vector incidente unitario.
+   * @param normal Normal de la superficie.
+   * @param etai_over_etat Relación de índices de refracción entre ambos medios.
+   * @return Vector refractado o std::nullopt si no hay transmisión.
+   */
 
   std::optional<vector> refract(vector const & v_in_unit, vector const & normal,
                                 float etai_over_etat) {
@@ -48,7 +84,16 @@ namespace render {
     return r_out_perp + r_out_para;
   }
 
-  // VENTANA DE PROYECCION  --> COMPROBAR SI EL CFG EN LOS MAIN ESTÁ BIEN
+  /**
+   * @brief Inicializa la cámara de renderizado a partir de los parámetros de configuración.
+   *
+   * Calcula la posición de la cámara, la orientación y la ventana de proyección
+   * en función del campo de visión y la relación de aspecto definidos en el archivo de
+   * configuración.
+   *
+   * @param cfg Estructura Config con los parámetros de cámara e imagen.
+   */
+
   Camera::Camera(Config const & cfg) {
     vector const P = parse_vector_from_string(cfg.camera_position);
     vector const D = parse_vector_from_string(cfg.camera_target);
@@ -85,16 +130,41 @@ namespace render {
     m_origin_ventana = P - v_focal - 0.5F * (p_h + p_v) + 0.5F * (m_delta_x + m_delta_y);  // ORIGEN
   }
 
+  /**
+   * @brief Genera un rayo desde la cámara hacia el píxel indicado en el plano de imagen.
+   *
+   * Los parámetros x_jit y y_jit incluyen un desplazamiento aleatorio (jitter)
+   * para aplicar antialiasing.
+   *
+   * @param x_jit Coordenada X del píxel con desplazamiento aleatorio.
+   * @param y_jit Coordenada Y del píxel con desplazamiento aleatorio.
+   * @return Rayo normalizado que parte de la cámara y atraviesa el píxel correspondiente.
+   */
+
   Ray Camera::get_ray(float x_jit, float y_jit) const {
-    // Aquí se estan creando los valores aleatorios? --> x_jit y y_jit --> Aqui se supone que se
-    // está sumando ya la columna y la fila
     vector const pixel_center = m_origin_ventana + (x_jit * m_delta_x) + (y_jit * m_delta_y);
 
-    // ESTA LOGICA NO ME QUEDA NADA CLARA --> PAGINA 12 PDF
     //"Crea un nuevo rayo de luz que comience en la posición de mi cámara (m_camera_origin)
     // y apunte en la dirección que va desde la cámara hacia el punto pixel_center."
     return {m_camera_origin, (pixel_center - m_camera_origin).normalized()};
   }
+
+  /**
+   * @brief Calcula el color resultante de un rayo al interactuar con la escena.
+   *
+   * El color se obtiene de forma recursiva aplicando los modelos de material:
+   *  - **Matte:** reflexión difusa aleatoria.
+   *  - **Metal:** reflexión especular con rugosidad.
+   *  - **Refractive:** transmisión según índice de refracción.
+   *
+   * Si no hay intersección, devuelve el color de fondo interpolado.
+   *
+   * @param r Rayo lanzado desde la cámara o rebote previo.
+   * @param scene Escena con objetos y materiales.
+   * @param ctx Contexto de render con parámetros de iluminación y RNG.
+   * @param depth Profundidad máxima de recursión para los rebotes.
+   * @return Vector RGB con el color resultante.
+   */
 
   vector ray_color(Ray const & r, render::Scene const & scene, RenderContext & ctx, int depth) {
     // PROFUNDIDAD <= 0, NO HAY CONTRIBUCION AL COLOR
@@ -157,9 +227,7 @@ namespace render {
           } else {
             direction = *refracted_opt;
           }
-          Ray bounced_ray(
-              hit->point,
-              direction);  // (normal * ... ) lo he añadido para ver si arregla refractive
+          Ray bounced_ray(hit->point, direction);
           return albedo * ray_color(bounced_ray, scene, ctx, depth - 1);
         }
       } catch (std::out_of_range const &) {
@@ -172,9 +240,6 @@ namespace render {
     float m = (r.direction().y() + 1.0F) * 0.5F;
 
     return (1.0F - m) * ctx.bg_light + m * ctx.bg_dark;
-
-    /* return (1.0F - m) * ctx.bg_dark +
-           m * ctx.bg_light;  // NO SE TIO ESTO CREO Q ESTA BIEN ASI PERO SINO VOLVER A INVERTIR */
   }
 
 }  // namespace render

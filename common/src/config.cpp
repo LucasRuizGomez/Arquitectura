@@ -1,13 +1,29 @@
+/**
+ * @file config.cpp
+ * @brief Implementa el parser del archivo de configuración (.cfg) del motor de renderizado
+ *
+ * Este módulo lee los parámetros de imagen, cámara y generadores RNG desde un archivo
+ * de texto y valida los valores según las reglas definidas en el proyecto.
+ */
+
 #include "../include/config.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <stdexcept>  // M: añadido para lanzar std::runtime_error y terminar ejecución sin continuar
+#include <stdexcept>  // Para lanzar std::runtime_error en caso de error crítico
 #include <string>
 
 namespace render {
 
-  // M: helper para detectar datos extra después de una línea válida
+  /**
+   * @brief Función auxiliar que detecta y recopila datos extra al final de una línea válida.
+   *
+   * Si tras leer los parámetros esperados queda texto adicional en el flujo de entrada,
+   * esta función lo devuelve para informar de un error "Extra data after configuration value".
+   *
+   * @param iss Flujo de entrada asociado a la línea actual.
+   * @return std::string con el texto sobrante (vacío si no hay).
+   */
   namespace {
 
     inline std::string collect_extra(std::istringstream & iss) {
@@ -16,7 +32,7 @@ namespace render {
         std::string tail;
         std::getline(iss, tail);
         if (!tail.empty() and tail.front() == ' ') {
-          tail.erase(tail.begin());  // limpia el primer espacio
+          tail.erase(tail.begin());  // elimina el primer espacio sobrante
         }
         extra += tail;
       }
@@ -24,6 +40,19 @@ namespace render {
     }
 
   }  // namespace
+
+  /**
+   * @brief Lee un archivo de configuración y construye un objeto Config con los parámetros válidos.
+   *
+   * La función procesa línea a línea el archivo .cfg verificando:
+   *  - Estructura de clave y valor.
+   *  - Rangos válidos de cada parámetro.
+   *  - Ausencia de datos adicionales tras el valor esperado.
+   *
+   * @param filename Ruta del archivo de configuración a leer.
+   * @return Config Estructura con los valores configurados.
+   * @throws std::runtime_error Si el archivo no se puede abrir o si se detecta un formato inválido.
+   */
 
   Config read_config(std::string const & filename) {
     Config cfg{};
@@ -34,18 +63,15 @@ namespace render {
 
     std::string line;
     while (std::getline(file, line)) {
-      if (line.empty() or line[0] == '#') {  // Ignorar comentarios  continue;
+      // Ignorar líneas vacías y comentarios
+      if (line.empty() or line[0] == '#') {
       }
 
       std::istringstream iss(line);
       std::string key;
       if (!(iss >> key)) {
-        continue;
+        continue;  // línea sin contenido útil
       }
-
-      // PARAMETROS DE GENERACION DE IMAGEN //
-
-      // PREGUNTA --> Todos estos condicionales no seria mejor un switch?
 
       // 1. RELACION DE ASPECTO
       if (key == "aspect_ratio:") {
@@ -182,7 +208,7 @@ namespace render {
         }
       }
 
-      // 10 CÁMARA (solo guardan cadenas, no necesitan parseo adicional)
+      // CÁMARA
       else if (key == "camera_position:")
       {
         std::getline(iss, cfg.camera_position);
