@@ -2,11 +2,12 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <stdexcept>
+#include <stdexcept>  // M: añadido para lanzar std::runtime_error y terminar ejecución sin continuar
 #include <string>
 
 namespace render {
 
+  // M: helper para detectar datos extra después de una línea válida
   namespace {
 
     inline std::string collect_extra(std::istringstream & iss) {
@@ -44,8 +45,9 @@ namespace render {
 
       // PARAMETROS DE GENERACION DE IMAGEN //
 
-      // -------------- 1. RELACION DE ASPECTO
+      // PREGUNTA --> Todos estos condicionales no seria mejor un switch?
 
+      // 1. RELACION DE ASPECTO
       if (key == "aspect_ratio:") {
         int w{}, h{};
         if (!(iss >> w >> h)) {
@@ -73,7 +75,7 @@ namespace render {
       }
       //
 
-      // --------------  2️ IMAGE WIDTH
+      // 2️ IMAGE WIDTH
       else if (key == "image_width:")
       {
         if (!(iss >> cfg.image_width)) {
@@ -90,7 +92,7 @@ namespace render {
         }
       }
       //
-      //  -------------- 3️ GAMMA
+      // 3️ GAMMA
       else if (key == "gamma:")
       {
         if (!(iss >> cfg.gamma)) {
@@ -103,7 +105,7 @@ namespace render {
         }
       }
 
-      //  -------------- 4️ SAMPLES PER PIXEL
+      // 4️ SAMPLES PER PIXEL
       else if (key == "samples_per_pixel:")
       {
         if (!(iss >> cfg.samples_per_pixel)) {
@@ -118,7 +120,7 @@ namespace render {
         }
       }
 
-      // --------------  5️ MAX DEPTH
+      // 5️ MAX DEPTH
       else if (key == "max_depth:")
       {
         if (!(iss >> cfg.max_depth)) {
@@ -131,7 +133,7 @@ namespace render {
         }
       }
 
-      // --------------  6️ FIELD OF VIEW
+      // 6️ FIELD OF VIEW
       else if (key == "field_of_view:")
       {
         if (!(iss >> cfg.field_of_view)) {
@@ -146,7 +148,7 @@ namespace render {
         }
       }
 
-      //  -------------- 7️ MATERIAL RNG SEED
+      // 7️ MATERIAL RNG SEED
       else if (key == "material_rng_seed:")
       {
         if (!(iss >> cfg.material_rng_seed) or cfg.material_rng_seed <= 0) {
@@ -155,7 +157,7 @@ namespace render {
         }
       }
 
-      //  -------------- 8️RAY RNG SEED
+      // 8️RAY RNG SEED
       else if (key == "ray_rng_seed:")
       {
         if (!(iss >> cfg.ray_rng_seed) or cfg.ray_rng_seed <= 0) {
@@ -164,7 +166,7 @@ namespace render {
         }
       }
 
-      // --------------  9️ BACKGROUND COLORS
+      // 9️ BACKGROUND COLORS
       else if (key == "background_dark_color:")
       {
         std::getline(iss, cfg.background_dark_color);
@@ -180,7 +182,7 @@ namespace render {
         }
       }
 
-      //  -------------- 10 CÁMARA
+      // 10 CÁMARA (solo guardan cadenas, no necesitan parseo adicional)
       else if (key == "camera_position:")
       {
         std::getline(iss, cfg.camera_position);
@@ -190,7 +192,7 @@ namespace render {
         std::getline(iss, cfg.camera_north);
       }
 
-      //   --------------  ETIQUETA DESCONOCIDA
+      //  ETIQUETA DESCONOCIDA
       else
       {
         std::ostringstream oss;

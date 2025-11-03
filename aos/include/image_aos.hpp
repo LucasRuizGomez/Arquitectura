@@ -26,21 +26,17 @@ namespace render {
         : width{w}, height{h}, data(static_cast<size_t>(w) * static_cast<size_t>(h)) { }
 
     // Set pixel safely (no bounds checking here for speed; puede añadirse si quieres)
-    void set_pixel(int x, int y, std::uint8_t r, std::uint8_t g, std::uint8_t b) noexcept {
-      auto const idx = static_cast<size_t>(y) * static_cast<size_t>(width) + static_cast<size_t>(x);
-      data[idx].r    = r;
-      data[idx].g    = g;
-      data[idx].b    = b;
-    }
+    void set_r(size_t idx, std::uint8_t r) noexcept { data[idx].r = r; }
 
-    // Get pixel (para pruebas)
-    void get_pixel(int x, int y, std::uint8_t & r, std::uint8_t & g,
-                   std::uint8_t & b) const noexcept {
-      auto const idx = static_cast<size_t>(y) * static_cast<size_t>(width) + static_cast<size_t>(x);
-      r              = data[idx].r;
-      g              = data[idx].g;
-      b              = data[idx].b;
-    }
+    void set_g(size_t idx, std::uint8_t g) noexcept { data[idx].g = g; }
+
+    void set_b(size_t idx, std::uint8_t b) noexcept { data[idx].b = b; }
+
+    [[nodiscard]] uint8_t get_r(size_t idx) const noexcept { return data[idx].r; }
+
+    [[nodiscard]] uint8_t get_g(size_t idx) const noexcept { return data[idx].g; }
+
+    [[nodiscard]] uint8_t get_b(size_t idx) const noexcept { return data[idx].b; }
 
     // Guardar PPM (P3, texto)
     void save_to_ppm(std::string const & filename) const {
@@ -57,9 +53,8 @@ namespace render {
         for (int x = 0; x < width; ++x) {
           auto const idx =
               static_cast<size_t>(y) * static_cast<size_t>(width) + static_cast<size_t>(x);
-          auto const & px = data[idx];
-          out << static_cast<int>(px.r) << ' ' << static_cast<int>(px.g) << ' '
-              << static_cast<int>(px.b) << '\n';
+          out << static_cast<int>(get_r(idx)) << ' ' << static_cast<int>(get_g(idx)) << ' '
+              << static_cast<int>(get_b(idx)) << '\n';
         }
       }
 

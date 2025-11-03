@@ -10,71 +10,106 @@ TEST(ImageAOSTest, ConstructsWithWidthHeightAndAllocates) {
   ImageAOS img(3, 2);
   EXPECT_EQ(img.width, 3);
   EXPECT_EQ(img.height, 2);
+
   // Debe haber width*height píxeles
-  ASSERT_EQ(img.data.size(), static_cast<size_t>(3 * 2));
-  // Inicialmente a cero
-  for (auto const & px : img.data) {
-    EXPECT_EQ(px.r, 0);
-    EXPECT_EQ(px.g, 0);
-    EXPECT_EQ(px.b, 0);
+  auto const n = static_cast<size_t>(3 * 2);
+
+  // Inicialmente a cero (comprobado vía interfaz pública)
+  for (size_t i = 0; i < n; ++i) {
+    EXPECT_EQ(img.get_r(i), 0);
+    EXPECT_EQ(img.get_g(i), 0);
+    EXPECT_EQ(img.get_b(i), 0);
   }
 }
 
 TEST(ImageAOSTest, SetAndGetPixelWorksAndIndexingIsRowMajor) {
   ImageAOS img(4, 3);
+  auto const width    = static_cast<size_t>(img.width);
+  auto const idx_calc = [width](size_t x, size_t y) { return y * width + x; };
 
   // Escribe varios píxeles distintivos
-  img.set_pixel(0, 0, 10, 11, 12);  // primer píxel del buffer
-  img.set_pixel(3, 0, 20, 21, 22);  // extremo derecha de fila 0
-  img.set_pixel(0, 2, 30, 31, 32);  // primera col de última fila
-  img.set_pixel(3, 2, 40, 41, 42);  // último píxel del buffer
+  size_t idx00 = idx_calc(0, 0);  // (0,0)
+  img.set_r(idx00, 10);
+  img.set_g(idx00, 11);
+  img.set_b(idx00, 12);
 
-  // Lee y comprueba
-  uint8_t r = 0, g = 0, b = 0;
+  size_t idx30 = idx_calc(3, 0);  // (3,0)
+  img.set_r(idx30, 20);
+  img.set_g(idx30, 21);
+  img.set_b(idx30, 22);
 
-  img.get_pixel(0, 0, r, g, b);
-  EXPECT_EQ(r, 10);
-  EXPECT_EQ(g, 11);
-  EXPECT_EQ(b, 12);
+  size_t idx02 = idx_calc(0, 2);  // (0,2)
+  img.set_r(idx02, 30);
+  img.set_g(idx02, 31);
+  img.set_b(idx02, 32);
 
-  img.get_pixel(3, 0, r, g, b);
-  EXPECT_EQ(r, 20);
-  EXPECT_EQ(g, 21);
-  EXPECT_EQ(b, 22);
+  size_t idx32 = idx_calc(3, 2);  // (3,2)
+  img.set_r(idx32, 40);
+  img.set_g(idx32, 41);
+  img.set_b(idx32, 42);
 
-  img.get_pixel(0, 2, r, g, b);
-  EXPECT_EQ(r, 30);
-  EXPECT_EQ(g, 31);
-  EXPECT_EQ(b, 32);
+  // Lee y comprueba usando la nueva interfaz 'get'
+  EXPECT_EQ(img.get_r(idx00), 10);
+  EXPECT_EQ(img.get_g(idx00), 11);
+  EXPECT_EQ(img.get_b(idx00), 12);
 
-  img.get_pixel(3, 2, r, g, b);
-  EXPECT_EQ(r, 40);
-  EXPECT_EQ(g, 41);
-  EXPECT_EQ(b, 42);
+  EXPECT_EQ(img.get_r(idx30), 20);
+  EXPECT_EQ(img.get_g(idx30), 21);
+  EXPECT_EQ(img.get_b(idx30), 22);
+
+  EXPECT_EQ(img.get_r(idx02), 30);
+  EXPECT_EQ(img.get_g(idx02), 31);
+  EXPECT_EQ(img.get_b(idx02), 32);
+
+  EXPECT_EQ(img.get_r(idx32), 40);
+  EXPECT_EQ(img.get_g(idx32), 41);
+  EXPECT_EQ(img.get_b(idx32), 42);
 
   // Verifica que el índice usado es y*width + x (row-major)
   // En concreto, (3,2) en 4x3 => idx = 2*4 + 3 = 11 (último elemento)
-  ASSERT_EQ(&img.data.back(), &img.data[2 * 4 + 3]);
-  EXPECT_EQ(img.data.back().r, 40);
-  EXPECT_EQ(img.data.back().g, 41);
-  EXPECT_EQ(img.data.back().b, 42);
+  size_t const last_idx = (3 * 4) - 1;  // 11
+  EXPECT_EQ(idx32, last_idx);
+  EXPECT_EQ(img.get_r(last_idx), 40);
+  EXPECT_EQ(img.get_g(last_idx), 41);
+  EXPECT_EQ(img.get_b(last_idx), 42);
 }
 
 TEST(ImageAOSTest, SaveToPPMWritesHeaderAndDataInRowMajorOrder) {
   ImageAOS img(2, 2);
+  auto const width    = static_cast<size_t>(img.width);
+  auto const idx_calc = [width](size_t x, size_t y) { return y * width + x; };
+
   // Layout esperado en el fichero (y exterior, x interior):
   // y=0: (0,0) -> 255 0 0   | (1,0) -> 0 255 0
   // y=1: (0,1) -> 0 0 255   | (1,1) -> 255 255 255
-  img.set_pixel(0, 0, 255, 0, 0);
-  img.set_pixel(1, 0, 0, 255, 0);
-  img.set_pixel(0, 1, 0, 0, 255);
-  img.set_pixel(1, 1, 255, 255, 255);
+  size_t idx00 = idx_calc(0, 0);  // (0,0)
+  img.set_r(idx00, 255);
+  img.set_g(idx00, 0);
+  img.set_b(idx00, 0);
+
+  size_t idx10 = idx_calc(1, 0);  // (1,0)
+  img.set_r(idx10, 0);
+  img.set_g(idx10, 255);
+  img.set_b(idx10, 0);
+
+  size_t idx01 = idx_calc(0, 1);  // (0,1)
+  img.set_r(idx01, 0);
+  img.set_g(idx01, 0);
+  img.set_b(idx01, 255);
+
+  size_t idx11 = idx_calc(1, 1);  // (1,1)
+  img.set_r(idx11, 255);
+  img.set_g(idx11, 255);
+  img.set_b(idx11, 255);
 
   // Archivo temporal
   auto const tmp = std::filesystem::temp_directory_path() / "aos_test.ppm";
   img.save_to_ppm(tmp.string());
 
-  // Abre y valida
+  // --- El resto del test no necesita cambios ---
+  // Verifica el *resultado* de save_to_ppm, que ya fue actualizada
+  // para usar get_r(idx), get_g(idx), etc.
+
   std::ifstream in(tmp);
   ASSERT_TRUE(in.is_open());
 
@@ -86,7 +121,6 @@ TEST(ImageAOSTest, SaveToPPMWritesHeaderAndDataInRowMajorOrder) {
   EXPECT_EQ(h, 2);
   EXPECT_EQ(maxc, 255);
 
-  // Lee 4 píxeles en el orden escrito
   int r = 0, g = 0, b = 0;
 
   // (0,0)

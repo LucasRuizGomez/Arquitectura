@@ -23,21 +23,17 @@ namespace render {
         : width(w), height(h), R(static_cast<size_t>(w * h)), G(static_cast<size_t>(w * h)),
           B(static_cast<size_t>(w * h)) { }
 
-    // === Set pixel ===
-    void set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) noexcept {
-      int const idx               = y * width + x;
-      R[static_cast<size_t>(idx)] = r;
-      G[static_cast<size_t>(idx)] = g;
-      B[static_cast<size_t>(idx)] = b;
-    }
+    void set_r(size_t idx, std::uint8_t r) noexcept { R[idx] = r; }
 
-    // === Get pixel (opcional, para pruebas) ===
-    void get_pixel(int x, int y, uint8_t & r, uint8_t & g, uint8_t & b) const noexcept {
-      int const idx = y * width + x;
-      r             = R[static_cast<size_t>(idx)];
-      g             = G[static_cast<size_t>(idx)];
-      b             = B[static_cast<size_t>(idx)];
-    }
+    void set_g(size_t idx, std::uint8_t g) noexcept { G[idx] = g; }
+
+    void set_b(size_t idx, std::uint8_t b) noexcept { B[idx] = b; }
+
+    [[nodiscard]] uint8_t get_r(size_t idx) const noexcept { return R[idx]; }
+
+    [[nodiscard]] uint8_t get_g(size_t idx) const noexcept { return G[idx]; }
+
+    [[nodiscard]] uint8_t get_b(size_t idx) const noexcept { return B[idx]; }
 
     // === Guardar como archivo PPM ===
     void save_to_ppm(std::string const & filename) const {
@@ -51,10 +47,11 @@ namespace render {
 
       for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-          int const idx = y * width + x;
-          out << static_cast<int>(R[static_cast<size_t>(idx)]) << ' '
-              << static_cast<int>(G[static_cast<size_t>(idx)]) << ' '
-              << static_cast<int>(B[static_cast<size_t>(idx)]) << '\n';
+          auto const idx =
+              static_cast<size_t>(y) * static_cast<size_t>(width) + static_cast<size_t>(x);
+          // Actualizado para usar la nueva interfaz 'get'
+          out << static_cast<int>(get_r(idx)) << ' ' << static_cast<int>(get_g(idx)) << ' '
+              << static_cast<int>(get_b(idx)) << '\n';
         }
       }
 

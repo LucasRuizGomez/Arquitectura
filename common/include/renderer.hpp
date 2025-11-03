@@ -72,7 +72,13 @@ namespace render {
     auto const r_byte = static_cast<uint8_t>(r * 255.0F);
     auto const g_byte = static_cast<uint8_t>(g * 255.0F);
     auto const b_byte = static_cast<uint8_t>(b * 255.0F);
-    image.set_pixel(x, y, r_byte, g_byte, b_byte);
+    auto const idx =
+        static_cast<size_t>(y) * static_cast<size_t>(image.width) + static_cast<size_t>(x);
+
+    //    Esto funciona para ImageAOS e ImageSOA sin distinción.
+    image.set_r(idx, r_byte);
+    image.set_g(idx, g_byte);
+    image.set_b(idx, b_byte);
   }
 
   // Recorre la imagen y va lanzando rayos

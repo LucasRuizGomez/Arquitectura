@@ -1,4 +1,6 @@
-#include "../include/renderer.hpp"
+#include "../include/renderer.hpp"  // Include the header file
+
+// Add other necessary includes that were used by the function bodies
 #include "../include/config.hpp"
 #include "../include/hittable.hpp"
 #include "../include/ray.hpp"
@@ -6,19 +8,20 @@
 #include "../include/scene.hpp"
 #include "../include/vector.hpp"
 
-#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <limits>
 #include <numbers>
 #include <optional>
 #include <sstream>
-#include <stdexcept>
+#include <stdexcept>  // For std::out_of_range
 #include <string>
 
 namespace render {
 
-  vector parse_vector_from_string(std::string const & s) {
+  // --- DEFINITIONS MOVED HERE ---
+
+  vector parse_vector_from_string(std::string s) {
     std::istringstream iss(s);
     float x{}, y{}, z{};  // inicializamos
     if (!(iss >> x >> y >> z)) {
@@ -34,14 +37,14 @@ namespace render {
 
   std::optional<vector> refract(vector const & v_in_unit, vector const & normal,
                                 float etai_over_etat) {
-    float const cos_theta   = std::min(dot(-v_in_unit, normal), 1.0F);
-    vector const r_out_perp = etai_over_etat * (v_in_unit + cos_theta * normal);
-    float const desc_sq     = 1.0F - r_out_perp.length_squared();
+    float const cos_theta = std::min(dot(-v_in_unit, normal), 1.0F);
+    vector r_out_perp     = etai_over_etat * (v_in_unit + cos_theta * normal);
+    float desc_sq         = 1.0F - r_out_perp.length_squared();
 
     if (desc_sq < 0.0F) {
       return std::nullopt;  // Total internal reflection
     }
-    vector const r_out_para = -std::sqrtf(desc_sq) * normal;
+    vector r_out_para = -std::sqrtf(desc_sq) * normal;
     return r_out_perp + r_out_para;
   }
 
@@ -118,18 +121,18 @@ namespace render {
           {
             bounce_direction = hit->normal;
           }
-          Ray const bounced_ray(hit->point, bounce_direction.normalized());
+          Ray bounced_ray(hit->point, bounce_direction.normalized());
           return albedo * ray_color(bounced_ray, scene, ctx, depth - 1);
         }
 
         // --- LÓGICA DE MATERIAL 'METAL' ---
         if (mat.type == "metal" and mat.params.size() >= 4) {
-          albedo                 = {mat.params[0], mat.params[1], mat.params[2]};
-          float const roughness  = mat.params[3];
-          vector const reflected = reflect(r.direction(), hit->normal);
-          vector const bounce_direction =
+          albedo           = {mat.params[0], mat.params[1], mat.params[2]};
+          float roughness  = mat.params[3];
+          vector reflected = reflect(r.direction(), hit->normal);
+          vector bounce_direction =
               (reflected + roughness * ctx.material_rng.random_in_unit_sphere());
-          Ray const bounced_ray(hit->point, bounce_direction);
+          Ray bounced_ray(hit->point, bounce_direction);
 
           /*           if (dot(bounced_ray.direction(), hit->normal) <= 0.F) {
                       return {0.F, 0.F, 0.F};
@@ -138,9 +141,9 @@ namespace render {
         }
 
         // --- LÓGICA DE MATERIAL 'REFRACTIVE' ---
-        if (mat.type == "refractive" and mat.params.empty()) {
+        if (mat.type == "refractive" and mat.params.size() >= 1) {
           albedo                       = {1.0F, 1.0F, 1.0F};
-          float const ior              = mat.params[0];
+          float ior                    = mat.params[0];
           bool const front_face        = dot(r.direction(), hit->normal) < 0.F;
           vector const normal          = front_face ? hit->normal : -hit->normal;
           float const refraction_ratio = front_face ? (1.0F / ior) : ior;
@@ -154,7 +157,7 @@ namespace render {
           } else {
             direction = *refracted_opt;
           }
-          Ray const bounced_ray(
+          Ray bounced_ray(
               hit->point,
               direction);  // (normal * ... ) lo he añadido para ver si arregla refractive
           return albedo * ray_color(bounced_ray, scene, ctx, depth - 1);
@@ -166,7 +169,7 @@ namespace render {
     }
 
     // --- Background Color ---
-    float const m = (r.direction().y() + 1.0F) * 0.5F;
+    float m = (r.direction().y() + 1.0F) * 0.5F;
 
     return (1.0F - m) * ctx.bg_light + m * ctx.bg_dark;
 

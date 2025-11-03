@@ -1,19 +1,20 @@
 #include "../include/hittable.hpp"
-#include "../include/ray.hpp"
 #include "../include/vector.hpp"
-
+// #include <vector>
+// using std::vector;
 #include "../include/scene.hpp"
+
 #include <cmath>
-#include <optional>
-#include <stdexcept>
+
+// #include <iomanip>
+// #include <iostream>
 
 namespace render {
 
   // Constante de precisión para evitar problemas con floats
-  constexpr float epsilon = 0.00001F;
+  constexpr float epsilon = 0.00001F;  // Un poco más pequeño
 
   // INTERSECCIÓN CON ESFERA
-
   std::optional<HitRecord> hit_sphere(Sphere const & s, Ray const & r, float lambda_min,
                                       float lambda_max) {
     if (s.r <= 0.0F) {
@@ -24,7 +25,7 @@ namespace render {
     }
     vector const center(s.cx, s.cy, s.cz);
     vector const rc          = r.origin() - center;
-    float const A            = r.direction().length_squared();
+    float const A            = r.direction().length_squared();  // 1.0F
     float const B            = 2.0F * dot(rc, r.direction());
     float const C            = rc.length_squared() - s.r * s.r;
     float const discriminant = B * B - 4.F * A * C;
@@ -56,7 +57,7 @@ namespace render {
     return rec;
   }
 
-  namespace {
+  namespace {  // Namespace anonimo
 
     struct CylinderHitTest {
       Ray r;
@@ -113,12 +114,12 @@ namespace render {
       }
 
       void check_cap_hit(vector const & cap_center, vector const & normal) {
-        float const dr_dot_normal = dot(r.direction(), normal);
+        float dr_dot_normal = dot(r.direction(), normal);
 
         if (std::fabs(dr_dot_normal) < 0.0001F) {
           return;
         }
-        float const lambda = dot(cap_center - r.origin(), normal) / dr_dot_normal;
+        float lambda = dot(cap_center - r.origin(), normal) / dr_dot_normal;
         if (lambda < lambda_min or lambda > min_lambda) {
           return;
         }
@@ -161,19 +162,19 @@ namespace render {
       throw std::runtime_error("Error: Cylinder axis vector cannot be zero-length");
     }
     CylinderHitTest test_ctx(c, r, lambda_min, lambda_max);
-    vector const OC          = r.origin() - test_ctx.C;
-    vector const DR          = r.direction();
-    float const dr_dot_axis  = dot(DR, test_ctx.axis);
-    float const oc_dot_axis  = dot(OC, test_ctx.axis);
-    float const A            = dot(DR, DR) - dr_dot_axis * dr_dot_axis;
-    float const B            = 2.0F * (dot(DR, OC) - dr_dot_axis * oc_dot_axis);
-    float const C_body       = dot(OC, OC) - oc_dot_axis * oc_dot_axis - test_ctx.radius_sq;
-    float const discriminant = B * B - 4.F * A * C_body;
+    vector const OC         = r.origin() - test_ctx.C;
+    vector const DR         = r.direction();
+    float const dr_dot_axis = dot(DR, test_ctx.axis);
+    float const oc_dot_axis = dot(OC, test_ctx.axis);
+    float A                 = dot(DR, DR) - dr_dot_axis * dr_dot_axis;
+    float B                 = 2.0F * (dot(DR, OC) - dr_dot_axis * oc_dot_axis);
+    float C_body            = dot(OC, OC) - oc_dot_axis * oc_dot_axis - test_ctx.radius_sq;
+    float discriminant      = B * B - 4.F * A * C_body;
     if (std::isnan(discriminant) or std::isinf(discriminant)) {
       throw std::runtime_error("Error: Cylinder discriminant produced NaN or INF");
     }
     if (discriminant >= 0.F) {
-      float const sqrt_discriminant = std::sqrtf(discriminant);
+      float sqrt_discriminant = std::sqrtf(discriminant);
 
       if (std::fabs(A) > epsilon) {
         test_ctx.check_body_hit((-B - sqrt_discriminant) / (2.0F * A));

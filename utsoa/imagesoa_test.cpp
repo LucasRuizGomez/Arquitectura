@@ -6,6 +6,7 @@
 
 using render::ImageSOA;
 
+// TEST 1: Sin cambios, ya era correcto.
 TEST(ImageSOATest, ConstructsWithWidthHeightAndAllocates) {
   ImageSOA img(3, 2);
   EXPECT_EQ(img.width, 3);
@@ -17,7 +18,7 @@ TEST(ImageSOATest, ConstructsWithWidthHeightAndAllocates) {
   ASSERT_EQ(img.G.size(), n);
   ASSERT_EQ(img.B.size(), n);
 
-  // Inicialmente a cero
+  // Inicialmente a cero (acceder a los vectores internos está bien para este test)
   for (size_t i = 0; i < n; ++i) {
     EXPECT_EQ(img.R[i], 0);
     EXPECT_EQ(img.G[i], 0);
@@ -25,72 +26,119 @@ TEST(ImageSOATest, ConstructsWithWidthHeightAndAllocates) {
   }
 }
 
+// TEST 2: Adaptado a la nueva interfaz
 TEST(ImageSOATest, SetAndGetPixelWorksAndIndexingIsRowMajor) {
   ImageSOA img(4, 3);
+  // El test ahora debe calcular los índices, igual que el renderer
+  auto const width    = static_cast<size_t>(img.width);
+  auto const idx_calc = [width](size_t x, size_t y) { return y * width + x; };
 
   // Escribe varios píxeles distintivos
-  img.set_pixel(0, 0, 10, 11, 12);  // primer píxel del buffer
-  img.set_pixel(3, 0, 20, 21, 22);  // extremo derecha de fila 0
-  img.set_pixel(0, 2, 30, 31, 32);  // primera col de última fila
-  img.set_pixel(3, 2, 40, 41, 42);  // último píxel del buffer
+  size_t idx00 = idx_calc(0, 0);  // (0,0) -> 0*4 + 0 = 0
+  img.set_r(idx00, 10);
+  img.set_g(idx00, 11);
+  img.set_b(idx00, 12);
 
-  uint8_t r = 0, g = 0, b = 0;
+  size_t idx30 = idx_calc(3, 0);  // (3,0) -> 0*4 + 3 = 3
+  img.set_r(idx30, 20);
+  img.set_g(idx30, 21);
+  img.set_b(idx30, 22);
 
-  img.get_pixel(0, 0, r, g, b);
-  EXPECT_EQ(r, 10);
-  EXPECT_EQ(g, 11);
-  EXPECT_EQ(b, 12);
+  size_t idx02 = idx_calc(0, 2);  // (0,2) -> 2*4 + 0 = 8
+  img.set_r(idx02, 30);
+  img.set_g(idx02, 31);
+  img.set_b(idx02, 32);
 
-  img.get_pixel(3, 0, r, g, b);
-  EXPECT_EQ(r, 20);
-  EXPECT_EQ(g, 21);
-  EXPECT_EQ(b, 22);
+  size_t idx32 = idx_calc(3, 2);  // (3,2) -> 2*4 + 3 = 11 (último)
+  img.set_r(idx32, 40);
+  img.set_g(idx32, 41);
+  img.set_b(idx32, 42);
 
-  img.get_pixel(0, 2, r, g, b);
-  EXPECT_EQ(r, 30);
-  EXPECT_EQ(g, 31);
-  EXPECT_EQ(b, 32);
+  // Ya no existe get_pixel(x,y,r,g,b), usamos get_r(idx), etc.
+  EXPECT_EQ(img.get_r(idx00), 10);
+  EXPECT_EQ(img.get_g(idx00), 11);
+  EXPECT_EQ(img.get_b(idx00), 12);
 
-  img.get_pixel(3, 2, r, g, b);
-  EXPECT_EQ(r, 40);
-  EXPECT_EQ(g, 41);
-  EXPECT_EQ(b, 42);
+  EXPECT_EQ(img.get_r(idx30), 20);
+  EXPECT_EQ(img.get_g(idx30), 21);
+  EXPECT_EQ(img.get_b(idx30), 22);
+
+  EXPECT_EQ(img.get_r(idx02), 30);
+  EXPECT_EQ(img.get_g(idx02), 31);
+  EXPECT_EQ(img.get_b(idx02), 32);
+
+  EXPECT_EQ(img.get_r(idx32), 40);
+  EXPECT_EQ(img.get_g(idx32), 41);
+  EXPECT_EQ(img.get_b(idx32), 42);
 
   // Verifica row-major: idx = y*width + x. En 4x3, (3,2) => 2*4 + 3 = 11 (último)
+  // Este chequeo sigue siendo válido y accede a los vectores internos.
   ASSERT_EQ(img.R.back(), 40);
   ASSERT_EQ(img.G.back(), 41);
   ASSERT_EQ(img.B.back(), 42);
 }
 
+// TEST 3: Adaptado a la nueva interfaz
 TEST(ImageSOATest, ChannelsRemainConsistentAcrossWrites) {
   ImageSOA img(2, 2);
+  auto const width = static_cast<size_t>(img.width);
+
   // Escribe dos píxeles y verifica que no se pisan índices entre canales
-  img.set_pixel(0, 0, 7, 8, 9);
-  img.set_pixel(1, 1, 200, 201, 202);
+  size_t idx00 = 0 * width + 0;  // 0
+  img.set_r(idx00, 7);
+  img.set_g(idx00, 8);
+  img.set_b(idx00, 9);
 
-  // Chequea cada canal por separado con índices esperados
-  // idx(1,1) en 2x2 = 1 + 1*2 = 3
-  EXPECT_EQ(img.R[0], 7);
-  EXPECT_EQ(img.G[0], 8);
-  EXPECT_EQ(img.B[0], 9);
+  size_t idx11 = 1 * width + 1;  // 3
+  img.set_r(idx11, 200);
+  img.set_g(idx11, 201);
+  img.set_b(idx11, 202);
 
-  EXPECT_EQ(img.R[3], 200);
-  EXPECT_EQ(img.G[3], 201);
-  EXPECT_EQ(img.B[3], 202);
+  // Chequea cada canal por separado usando la interfaz pública 'get'
+  EXPECT_EQ(img.get_r(idx00), 7);
+  EXPECT_EQ(img.get_g(idx00), 8);
+  EXPECT_EQ(img.get_b(idx00), 9);
+
+  EXPECT_EQ(img.get_r(idx11), 200);
+  EXPECT_EQ(img.get_g(idx11), 201);
+  EXPECT_EQ(img.get_b(idx11), 202);
 }
 
+// TEST 4: Adaptado a la nueva interfaz (solo la parte 'set')
 TEST(ImageSOATest, SaveToPPMWritesHeaderAndDataInRowMajorOrder) {
   ImageSOA img(2, 2);
+  auto const width = static_cast<size_t>(img.width);
+
   // Layout esperado (y exterior, x interior):
   // y=0: (0,0) -> 255 0 0   | (1,0) -> 0 255 0
   // y=1: (0,1) -> 0 0 255   | (1,1) -> 255 255 255
-  img.set_pixel(0, 0, 255, 0, 0);
-  img.set_pixel(1, 0, 0, 255, 0);
-  img.set_pixel(0, 1, 0, 0, 255);
-  img.set_pixel(1, 1, 255, 255, 255);
+
+  size_t idx00 = 0 * width + 0;  // (0,0)
+  img.set_r(idx00, 255);
+  img.set_g(idx00, 0);
+  img.set_b(idx00, 0);
+
+  size_t idx10 = 0 * width + 1;  // (1,0)
+  img.set_r(idx10, 0);
+  img.set_g(idx10, 255);
+  img.set_b(idx10, 0);
+
+  size_t idx01 = 1 * width + 0;  // (0,1)
+  img.set_r(idx01, 0);
+  img.set_g(idx01, 0);
+  img.set_b(idx01, 255);
+
+  size_t idx11 = 1 * width + 1;  // (1,1)
+  img.set_r(idx11, 255);
+  img.set_g(idx11, 255);
+  img.set_b(idx11, 255);
 
   auto const tmp = std::filesystem::temp_directory_path() / "soa_test.ppm";
   img.save_to_ppm(tmp.string());
+
+  // --- El resto del test no necesita cambios ---
+  // Verifica el *resultado* de save_to_ppm, que ya fue actualizada
+  // para usar get_r(idx), get_g(idx), etc.
 
   std::ifstream in(tmp);
   ASSERT_TRUE(in.is_open());
