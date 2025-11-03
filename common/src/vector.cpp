@@ -7,9 +7,4 @@
 
 namespace render {
 
-  // Ya no usamos 'magnitude()', usamos 'length()',
-  // pero podemos dejar esto aquí.
-  // Opcionalmente, puedes borrar este archivo
-  // y quitarlo de 'common/CMakeLists.txt'.
-
 }  // namespace render
