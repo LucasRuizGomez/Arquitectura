@@ -1,8 +1,10 @@
 #include "../include/scene.hpp"
 #include <fstream>
 #include <iostream>
+#include <istream>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
 namespace render {
   namespace {
@@ -32,10 +34,7 @@ namespace render {
 
     std::string line;
 
-    int line_number = 0;
     while (std::getline(file, line)) {
-      ++line_number;
-
       if (line.empty() or (!line.empty() and line[0] == '#')) {  // Ignorar comentarios
         continue;
       }
@@ -92,7 +91,7 @@ namespace render {
           float rr = 0.0F, gg = 0.0F, bb = 0.0F;
           if (!(iss_copy >> rr >> gg >> bb)) {
           }  // ya controlado
-          std::string extra = collect_extra(iss_copy);
+          std::string const extra = collect_extra(iss_copy);
           if (!extra.empty()) {
             std::ostringstream oss;  // usado para evitar concatenaciones temporales
             oss << "Error: Extra data after configuration value for key: [metal:]\n"
@@ -120,7 +119,7 @@ namespace render {
           float rr = 0.0F, gg = 0.0F, bb = 0.0F, ro = 0.0F;
           if (!(iss_copy >> rr >> gg >> bb >> ro)) {
           }
-          std::string extra = collect_extra(iss_copy);
+          std::string const extra = collect_extra(iss_copy);
           if (!extra.empty()) {
             std::ostringstream oss;
             oss << "Error: Extra data after configuration value for key: [sphere:]\n"
@@ -149,7 +148,7 @@ namespace render {
           ;
           if (!(iss_copy >> ior_copy)) {
           }
-          std::string extra = collect_extra(iss_copy);
+          std::string const extra = collect_extra(iss_copy);
           if (!extra.empty()) {
             std::ostringstream oss;
             oss << "Error: Extra data after configuration value for key: [cylinder:]\n"
@@ -187,7 +186,7 @@ namespace render {
         std::string mat;
         if (!(iss_copy >> cx >> cy >> cz >> r >> mat)) {
         }
-        std::string extra = collect_extra(iss_copy);
+        std::string const extra = collect_extra(iss_copy);
         if (!extra.empty()) {
           std::ostringstream oss;
           oss << "Error: Extra data after configuration value for key: [refractive:]\n"
@@ -221,7 +220,7 @@ namespace render {
         std::string mat;
         if (!(iss_copy >> cx >> cy >> cz >> r >> ax >> ay >> az >> mat)) {
         }
-        std::string extra = collect_extra(iss_copy);
+        std::string const extra = collect_extra(iss_copy);
         if (!extra.empty()) {
           std::ostringstream oss;
           oss << "Error: Extra data after configuration value for key: [cylinder:]\n"
